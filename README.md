@@ -27,9 +27,3 @@ pip install scikit-learn matplotlib pandas pillow tqdm huggingface_hub timm
 ## Results
 *(To be added)*
 ```
-
-Then:
-```
-git add README.md
-git commit -m "Add README with project overview"
-git push
