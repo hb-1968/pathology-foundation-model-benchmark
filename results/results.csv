@@ -1,0 +1,2 @@
+model,accuracy,auc,train_size,test_size,feature_dim
+resnet50,0.7963152507676561,0.8671438861876463,2175,977,2048
