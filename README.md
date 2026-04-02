@@ -25,5 +25,24 @@ pip install scikit-learn matplotlib pandas pillow tqdm huggingface_hub timm
 ```
 
 ## Results
-*(To be added)*
+```
+*ResNet-50 Results:*
+Train: 2175 images  |  Test: 977 images
+Train class balance: 28.97% SSA
+Test class balance:  36.85% SSA
+
+========================================
+Model: resnet50
+Accuracy: 0.7963
+AUC:      0.8671
+========================================
+              precision    recall  f1-score   support
+
+          HP       0.82      0.86      0.84       617
+         SSA       0.74      0.69      0.71       360
+
+    accuracy                           0.80       977
+   macro avg       0.78      0.77      0.78       977
+weighted avg       0.79      0.80      0.79       977
+
 ```
