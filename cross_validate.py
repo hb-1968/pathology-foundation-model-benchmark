@@ -13,7 +13,7 @@ import pandas as pd
 from pathlib import Path
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import StratifiedKFold
-from sklearn.metrics import roc_auc_score, accuracy_score
+from sklearn.metrics import roc_auc_score, accuracy_score, roc_curve, auc
 import matplotlib.pyplot as plt
 
 
@@ -35,6 +35,8 @@ def evaluate_model(model_name, df, emb_dir, n_folds=5):
 
     accs = []
     aucs = []
+    fold_y_true = []
+    fold_y_prob = []
 
     for fold, (train_idx, val_idx) in enumerate(skf.split(X, y)):
         X_train, X_val = X[train_idx], X[val_idx]
@@ -48,8 +50,10 @@ def evaluate_model(model_name, df, emb_dir, n_folds=5):
 
         accs.append(accuracy_score(y_val, y_pred))
         aucs.append(roc_auc_score(y_val, y_prob))
+        fold_y_true.append(y_val)
+        fold_y_prob.append(y_prob)
 
-    return np.array(accs), np.array(aucs)
+    return np.array(accs), np.array(aucs), fold_y_true, fold_y_prob
 
 
 def main():
@@ -72,7 +76,7 @@ def main():
     all_results = []
 
     for label, model_name in models.items():
-        accs, aucs = evaluate_model(model_name, df, emb_dir)
+        accs, aucs, fold_y_true, fold_y_prob = evaluate_model(model_name, df, emb_dir)
         print(f"{label.replace(chr(10), ' ')}")
         print(f"  Accuracy: {accs.mean():.4f} ± {accs.std():.4f}")
         print(f"  AUC:      {aucs.mean():.4f} ± {aucs.std():.4f}")
@@ -86,6 +90,8 @@ def main():
             "auc_std": aucs.std(),
             "fold_accs": accs,
             "fold_aucs": aucs,
+            "fold_y_true": fold_y_true,
+            "fold_y_prob": fold_y_prob,
         })
 
     # ── Bar chart with error bars ──
@@ -120,6 +126,40 @@ def main():
     fig.tight_layout()
     fig.savefig(out_dir / "cv_comparison.png", dpi=150, bbox_inches="tight")
     print(f"Saved to {out_dir / 'cv_comparison.png'}")
+
+    # ── ROC curves (mean ± 1 std across folds) ──
+    fig_roc, ax_roc = plt.subplots(figsize=(7, 6))
+    mean_fpr = np.linspace(0, 1, 100)
+
+    for r, color in zip(all_results, colors):
+        tprs = []
+        for yt, yp in zip(r["fold_y_true"], r["fold_y_prob"]):
+            fpr, tpr, _ = roc_curve(yt, yp)
+            tprs.append(np.interp(mean_fpr, fpr, tpr))
+            tprs[-1][0] = 0.0
+
+        mean_tpr = np.mean(tprs, axis=0)
+        mean_tpr[-1] = 1.0
+        std_tpr = np.std(tprs, axis=0)
+        mean_auc = auc(mean_fpr, mean_tpr)
+        std_auc = r["fold_aucs"].std()
+
+        short_label = r["label"].replace("\n", " ")
+        ax_roc.plot(mean_fpr, mean_tpr, color=color, lw=2,
+                    label=f"{short_label} (AUC = {mean_auc:.3f} ± {std_auc:.3f})")
+        ax_roc.fill_between(mean_fpr, mean_tpr - std_tpr, mean_tpr + std_tpr,
+                            color=color, alpha=0.15)
+
+    ax_roc.plot([0, 1], [0, 1], "k--", lw=1, label="Chance")
+    ax_roc.set_xlim([-0.02, 1.02])
+    ax_roc.set_ylim([-0.02, 1.02])
+    ax_roc.set_xlabel("False Positive Rate", fontsize=12)
+    ax_roc.set_ylabel("True Positive Rate", fontsize=12)
+    ax_roc.set_title("ROC Curves: 5-Fold Cross-Validation on MHIST", fontsize=13)
+    ax_roc.legend(loc="lower right", fontsize=10)
+    fig_roc.tight_layout()
+    fig_roc.savefig(out_dir / "cv_roc_curves.png", dpi=150, bbox_inches="tight")
+    print(f"Saved to {out_dir / 'cv_roc_curves.png'}")
 
     # ── Save CV results to CSV ──
     cv_df = pd.DataFrame([{
