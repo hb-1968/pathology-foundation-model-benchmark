@@ -80,5 +80,6 @@ python train_probe.py --model uni
    architecture family and self-supervised method but trained on ImageNet,
    performed worst — isolating pathology training data as the key factor.
 
+![ROC Comparison in Cross-Validation](results/cv_roc_curves.png)
 ![ROC Comparison](results/roc_comparison.png)
 ![Cross-Validation Comparison](results/cv_comparison.png)
