@@ -80,7 +80,7 @@ python train_probe.py --model uni
    architecture family and self-supervised method but trained on ImageNet,
    performed worst — isolating pathology training data as the key factor.
 
-4. **Conclusion:** Pathology-specific foundation models outperform baseline image models empirically. This implies that there is a empirical basis (corrobated in previous experiments that reached simila conclusions. With this in mind, it is possible to conclude that pathology-specific trained models are direction to come when it comes to analyzing imagery in Pathology and possibly Dermatopathology.
+4. **Conclusion:** Pathology-specific foundation models outperform baseline image models empirically. This implies that there is a empirical basis (corrobated in previous experiments that reached simila conclusions. With this in mind, it is possible to conclude that pathology-specific trained models are direction to come when it comes to analyzing imagery in Pathology and other related fields. Beyond this would be investigate the possibility of utilizing an ImageNet architecture trained on Pathology data instead of a ViT model to see how the models stack up, which I may include in a follow-up.
 
 ![ROC Comparison in Cross-Validation](results/cv_roc_curves.png)
 ![ROC Comparison](results/roc_comparison.png)
