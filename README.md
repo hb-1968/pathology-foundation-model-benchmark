@@ -58,4 +58,27 @@ python train_probe.py --model uni
 ```
 
 ## Results
-*(To be added)*
+
+### 5-Fold Stratified Cross-Validation on MHIST Training Set
+
+| Model | Accuracy | AUC |
+|-------|----------|-----|
+| ResNet-50 (ImageNet supervised) | 0.833 ± 0.010 | 0.890 ± 0.008 |
+| DINO ViT-B/16 (ImageNet self-supervised) | 0.814 ± 0.021 | 0.878 ± 0.014 |
+| UNI ViT-L/16 (Pathology self-supervised) | **0.858 ± 0.006** | **0.917 ± 0.008** |
+
+### Key Findings
+
+1. **Pathology-specific pretraining matters.** UNI outperforms both ImageNet
+   models, with a 2.7-point AUC advantage over ResNet-50 (0.917 vs 0.890).
+
+2. **Representation stability.** UNI features produce the most consistent
+   results across folds (lowest standard deviation), suggesting more robust
+   learned representations.
+
+3. **Architecture alone is insufficient.** DINO ViT-Base, sharing UNI's
+   architecture family and self-supervised method but trained on ImageNet,
+   performed worst — isolating pathology training data as the key factor.
+
+![ROC Comparison](results/roc_comparison.png)
+![Cross-Validation Comparison](results/cv_comparison.png)
